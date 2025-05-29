@@ -28,7 +28,7 @@ seccion = st.sidebar.radio(
 # ——————————————————————————————————————————————
 @st.cache_resource
 def load_expenses_pipeline():
-    return joblib.load("models/expenses_pipeline.pkl")
+    return joblib.load("models/expenses_model.pkl")
 
 # (Más adelante, podrías cargar tu modelo de DL en otra función)
 
