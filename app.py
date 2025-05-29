@@ -16,7 +16,7 @@ with st.sidebar.expander("🔧 Menú", expanded=True):
 
 @st.cache_resource
 def load_expenses_pipeline():
-    return joblib.load("models/expenses_pipeline.pkl")
+    return joblib.load("models/expenses_model.pkl")
 
 if seccion == "Predicción de Gastos":
     pipeline = load_expenses_pipeline()
