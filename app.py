@@ -38,7 +38,7 @@ seccion = st.session_state.app_selected
 # ---------------------------------------------------
 @st.cache_resource
 def load_expenses_pipeline():
-    return joblib.load("models/expenses_pipeline.pkl")
+    return joblib.load("models/expenses_model.pkl")
 
 # ---------------------------------------------------
 #  Sección 1: Predicción de Gastos
