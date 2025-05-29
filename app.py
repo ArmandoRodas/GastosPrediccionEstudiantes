@@ -2,70 +2,99 @@ import streamlit as st
 import pandas as pd
 import joblib
 
-# 1) Carga tu pipeline serializado
-MODEL_PATH = "models/expenses_pipeline.pkl"
+# ——————————————————————————————————————————————
+# CABECERA GLOBAL
+# ——————————————————————————————————————————————
 
+# Muestra la imagen del proyecto
+st.image("Inteligencia-artificial.jpg", use_column_width=True)
+
+# Títulos arriba de todo
+st.markdown("<h1 style='text-align:center;'>Inteligencia artificial</h1>", unsafe_allow_html=True)
+st.markdown("<h3 style='text-align:center;'>9no. Ingeniería en Sistemas Sanarate</h3>", unsafe_allow_html=True)
+st.write("---")  # línea dividora
+
+# ——————————————————————————————————————————————
+# MENÚ LATERAL
+# ——————————————————————————————————————————————
+st.sidebar.title("🔧 Menú")
+seccion = st.sidebar.radio(
+    "Elige la aplicación",
+    ["Predicción de Gastos", "Proyecto Deep Learning"]
+)
+
+# ——————————————————————————————————————————————
+# FUNCIONES AUXILIARES
+# ——————————————————————————————————————————————
 @st.cache_resource
-def load_pipeline():
-    return joblib.load(MODEL_PATH)
+def load_expenses_pipeline():
+    return joblib.load("models/expenses_pipeline.pkl")
 
-pipeline = load_pipeline()
+# (Más adelante, podrías cargar tu modelo de DL en otra función)
 
-st.title("📊 Predicción de Gastos Dia de Universidad")
 
-# 2) Inputs numéricos (que no necesitan mapeo)
-comidas_fuera = st.number_input("Comidas fuera de casa", min_value=0, step=1)
-snacks_q      = st.number_input("Cantidad de snacks en Q: ",      min_value=0, step=1)
-edad          = st.number_input("Edad : ",                    min_value=12, step=1)
-materias_dia  = st.number_input("Materias al día",         min_value=0, step=1)
-gasolina_q    = st.number_input("Gasto en gasolina (Q)",   min_value=0.0, step=0.1)
+# ——————————————————————————————————————————————
+# SECCIÓN 1: Predicción de Gastos
+# ——————————————————————————————————————————————
+if seccion == "Predicción de Gastos":
+    st.header("📊 Predicción de gastos estudiantiles")
+    # Carga el pipeline entrenado
+    pipeline = load_expenses_pipeline()
 
-# 3) Extrae las categorías del OneHotEncoder del pipeline
-#    pipeline.named_steps["prep"] es tu ColumnTransformer
-#    transformers_[1][1] es el encoder (asumiendo que lo pusiste segundo)
-ohe = pipeline.named_steps["prep"].transformers_[1][1]
-cats = ohe.categories_  
-# cats es una lista de arrays, en el mismo orden que cat_cols al entrenar:
-#   cat_cols = ["lugar","transporte","actividades_extra","lleva_almuerzo",
-#               "ocupacion","desayuno_casa","comparte_transporte","conduce"]
+    # Entradas numéricas
+    comidas_fuera = st.number_input("Comidas fuera de casa", min_value=0, step=1)
+    snacks_q      = st.number_input("Cantidad de snacks",      min_value=0, step=1)
+    edad          = st.number_input("Edad",                    min_value=12, step=1)
+    materias_dia  = st.number_input("Cursos en el día",        min_value=0, step=1)
+    gasolina_q    = st.number_input("Dinero para gasolina (Q)", min_value=0.0, step=0.1)
 
-# 4) Usa esas categorías en tus selectboxes
-lugar_opts      = list(cats[0])
-transporte_opts = list(cats[1])
-activ_extra_opts= list(cats[2])
-almuerzo_opts   = list(cats[3])
-ocupacion_opts  = list(cats[4])
-desayuno_opts   = list(cats[5])
-compartir_opts  = list(cats[6])
-conduce_opts    = list(cats[7])
+    # Extrae dinámicamente las categorías de tu OHE
+    ohe = pipeline.named_steps["prep"].transformers_[1][1]
+    cats = ohe.categories_
+    lugar_opts       = list(cats[0])
+    transporte_opts  = list(cats[1])
+    act_ext_opts     = list(cats[2])
+    almuerzo_opts    = list(cats[3])
+    compra_alm_opts  = list(cats[4])
+    ocup_opts        = list(cats[5])
+    desayuno_opts    = list(cats[6])
+    compra_des_opts  = list(cats[7])
+    comparte_opts    = list(cats[8])
 
-lugar             = st.selectbox("Lugar",               lugar_opts)
-transporte        = st.selectbox("Medio de transporte", transporte_opts)
-actividades_extra = st.selectbox("Actividades extra",   activ_extra_opts)
-lleva_almuerzo    = st.selectbox("Lleva almuerzo",      almuerzo_opts)
-ocupacion         = st.selectbox("Ocupación",           ocupacion_opts)
-desayuno_casa     = st.selectbox("Desayuna en casa",    desayuno_opts)
-comparte_transp   = st.selectbox("Comparte transporte", compartir_opts)
-conduce           = st.selectbox("Conduce vehículo",    conduce_opts)
+    # Entradas categóricas
+    lugar            = st.selectbox("Lugar de origen",       lugar_opts)
+    transporte       = st.selectbox("Transporte",            transporte_opts)
+    actividades_extra= st.selectbox("Actividades extra",     act_ext_opts)
+    lleva_almuerzo   = st.selectbox("Lleva almuerzo",        almuerzo_opts)
+    compra_almuerzo  = st.selectbox("Compra almuerzo",       compra_alm_opts)
+    ocupacion        = st.selectbox("Ocupación",             ocup_opts)
+    desayuno_casa    = st.selectbox("Desayuno en casa",      desayuno_opts)
+    compra_desayuno  = st.selectbox("Compra desayuno",       compra_des_opts)
+    comparte_transp  = st.selectbox("Comparte transporte",   comparte_opts)
 
-# 5) Botón de predicción
-if st.button("Calcular gasto"):
-    # 6) Construye el DataFrame en el mismo orden de columnas que entrenaste
-    df_in = pd.DataFrame([{
-        "lugar":              lugar,
-        "transporte":         transporte,
-        "actividades_extra":  actividades_extra,
-        "lleva_almuerzo":     lleva_almuerzo,
-        "ocupacion":          ocupacion,
-        "desayuno_casa":      desayuno_casa,
-        "comparte_transporte":comparte_transp,
-        "conduce":            conduce,
-        "comidas_fuera":      comidas_fuera,
-        "snacks_q":           snacks_q,
-        "edad":               edad,
-        "materias_dia":       materias_dia,
-        "gasolina_q":         gasolina_q
-    }])
-    # 7) Predice con el pipeline completo
-    gasto_pred = pipeline.predict(df_in)[0]
-    st.success(f"💰 Gasto estimado por día de clases: Q{gasto_pred:.2f}")
+    if st.button("▶️ Calcular gasto"):
+        df_in = pd.DataFrame([{
+            "lugar":               lugar,
+            "transporte":          transporte,
+            "actividades_extra":   actividades_extra,
+            "lleva_almuerzo":      lleva_almuerzo,
+            "compra_almuerzo":     compra_almuerzo,
+            "ocupacion":           ocupacion,
+            "desayuno_casa":       desayuno_casa,
+            "compra_desayuno":     compra_desayuno,
+            "comparte_transporte": comparte_transp,
+            "comidas_fuera":       comidas_fuera,
+            "snacks_q":            snacks_q,
+            "edad":                edad,
+            "materias_dia":        materias_dia,
+            "gasolina_q":          gasolina_q
+        }])
+        gasto = pipeline.predict(df_in)[0]
+        st.success(f"💰 Gasto estimado: Q{gasto:.2f}")
+
+# ——————————————————————————————————————————————
+# SECCIÓN 2: Proyecto Deep Learning (placeholder)
+# ——————————————————————————————————————————————
+else:
+    st.header("🤖 Proyecto Deep Learning")
+    st.info("Esta sección estará disponible cuando integres tu segundo modelo de DL.")
