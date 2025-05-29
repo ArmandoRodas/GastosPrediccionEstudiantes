@@ -16,12 +16,13 @@ with st.sidebar.expander("🔧 Menú", expanded=True):
 
 @st.cache_resource
 def load_pipeline():
-    return joblib.load("models/expenses_model.pkl")
+    return joblib.load("models/expenses_model.pkl")  # ⚠️ Asegúrate de que sea este archivo
 
 if seccion == "Predicción de Gastos":
     pipeline = load_pipeline()
 
-    ct = pipeline.named_steps["prep"]
+    # ✅ CORREGIDO: acceso directo
+    ct = pipeline["prep"]
     for name, transformer, cols in ct.transformers_:
         if name == "cat":
             ohe = transformer
@@ -29,7 +30,7 @@ if seccion == "Predicción de Gastos":
             break
     cats = ohe.categories_
 
-    col1, col2 = st.columns([1,2], gap="large")
+    col1, col2 = st.columns([1, 2], gap="large")
     with col1:
         st.subheader("🧮 Parámetros de Entrada")
         comidas_uni = st.number_input("Comidas en la Uni", min_value=0, step=1)

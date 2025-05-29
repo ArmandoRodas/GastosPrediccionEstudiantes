@@ -66,5 +66,5 @@ pipeline = Pipeline([
 
 # 5) Entrena y serializa
 pipeline.fit(X, y)
-joblib.dump(pipeline, "models/expenses_pipeline.pkl")
-print("✔ Pipeline entrenado y guardado en models/expenses_pipeline.pkl")
+joblib.dump(pipeline, "models/expenses_model.pkl")
+print("✔ Pipeline entrenado y guardado en models/expenses_model.pkl")
