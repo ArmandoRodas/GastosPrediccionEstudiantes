@@ -22,7 +22,7 @@ if seccion == "Predicción de Gastos":
     pipeline = load_pipeline()
 
     # ✅ CORREGIDO: acceso directo
-    ct = pipeline["prep"]
+    ct = pipeline.named_steps["prep"]
     for name, transformer, cols in ct.transformers_:
         if name == "cat":
             ohe = transformer
