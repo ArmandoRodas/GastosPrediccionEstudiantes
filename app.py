@@ -18,7 +18,7 @@ with st.sidebar.expander("🔧 Menú", expanded=True):
 # Cargar pipeline
 @st.cache_resource
 def load_pipeline():
-    return joblib.load("models/expenses_pipeline.pkl")
+    return joblib.load("models/expenses_model.pkl")
 
 # SECCIÓN 1: Predicción de Gastos
 if seccion == "Predicción de Gastos":
