@@ -77,10 +77,16 @@ if seccion == "Predicción de Gastos":
                 - Snacks, comidas, desayuno
                 - Edad, cursos del día, gasolina
                 - Ocupación (trabaja, estudia, ambas)
+                - Comparte transporte 
+                - Hecha o da dinero para gasolina
 
                 **Modelo utilizado:** Regresión RidgeCV con codificación categórica y escalado numérico.
 
                 Esta predicción ayuda a anticipar gastos semanales y analizar patrones de consumo estudiantil.
+                **Streamlit** es la plataforma utilizada para subir a la nube la aplicacion.
+                            Con solo registrar su correo enlazado con **Github** (correo de la universidad)
+                            le permite subir sus repositorios con sus proyectos a la nube.
+                            Dejandole hasta crear usted mismo el link
                 """, unsafe_allow_html=True)
 
     except Exception as e:

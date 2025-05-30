@@ -11,9 +11,9 @@ df.columns = df.columns.str.strip().str.lower()
 
 # Renombrar columnas
 df = df.rename(columns={
-    'lugar de origen': 'lugar',
-    'transporte en el que viaja': 'transporte',
-    'comidas en la uni': 'comidas_uni',
+    'lugar de origen': 'lugar_de_origen',
+    'transporte en el que viaja': 'transporte_en_el_que_viaja',
+    'comidas en la uni': 'comidas_en_la_Universidad',
     'compra snacks': 'compra_snacks',
     'actividades extra en la uni': 'actividades_extra',
     'lleva almuerzo': 'lleva_almuerzo',
@@ -24,15 +24,15 @@ df = df.rename(columns={
     'desayuno en casa': 'desayuno_casa',
     'compra desayuno': 'compra_desayuno',
     'comparte transporte': 'comparte_transporte',
-    'hecha o da dinero para gasolina': 'gasolina',
+    'hecha o da dinero para gasolina': 'Hecha_o_da_dinero_para_gasolina',
     'gasto_total_q': 'gasto_total'
 })
 
 # Columnas categóricas
 cat_cols = [
-    "lugar", "transporte", "compra_snacks", "actividades_extra",
+    "lugar_de_origen", "transporte_en_el_que_viaja", "compra_snacks", "actividades_extra",
     "lleva_almuerzo", "compra_almuerzo", "ocupacion", "desayuno_casa",
-    "compra_desayuno", "comparte_transporte", "gasolina"
+    "compra_desayuno", "comparte_transporte", "Hecha_o_da_dinero_para_gasolina"
 ]
 
 # Codificar categóricas con LabelEncoder
@@ -43,7 +43,7 @@ for col in cat_cols:
     label_encoders[col] = le  # Guardar el encoder por si lo necesitas en producción
 
 # Columnas numéricas
-num_cols = ["comidas_uni", "edad", "cursos_dia"]
+num_cols = ["comidas_en_la_Universidad", "edad", "cursos_dia"]
 
 # Variables finales
 X = df[cat_cols + num_cols]
