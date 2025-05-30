@@ -1,14 +1,12 @@
+import pandas as pd
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.linear_model import RidgeCV
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from sklearn.linear_model import RidgeCV
-import pandas as pd
 import joblib
 
-# Cargar datos
+# Cargar los datos
 df = pd.read_excel("data/datos_gasto_ampliado.xlsx", engine="openpyxl")
-
-# Normalizar nombres
 df.columns = df.columns.str.strip().str.lower()
 
 # Renombrar columnas
@@ -26,36 +24,42 @@ df = df.rename(columns={
     'desayuno en casa': 'desayuno_casa',
     'compra desayuno': 'compra_desayuno',
     'comparte transporte': 'comparte_transporte',
-    'hecha o da dinero para gasolina': 'gasolina_q',
+    'hecha o da dinero para gasolina': 'gasolina',
     'gasto_total_q': 'gasto_total'
 })
 
-# Variables
+# Columnas categóricas
 cat_cols = [
     "lugar", "transporte", "compra_snacks", "actividades_extra",
     "lleva_almuerzo", "compra_almuerzo", "ocupacion", "desayuno_casa",
-    "compra_desayuno", "comparte_transporte"
+    "compra_desayuno", "comparte_transporte", "gasolina"
 ]
-num_cols = ["comidas_uni", "edad", "cursos_dia", "gasolina_q"]
 
-# Forzar tipo texto
-df[cat_cols] = df[cat_cols].astype(str)
+# Codificar categóricas con LabelEncoder
+label_encoders = {}
+for col in cat_cols:
+    le = LabelEncoder()
+    df[col] = le.fit_transform(df[col])
+    label_encoders[col] = le  # Guardar el encoder por si lo necesitas en producción
 
-# Matrices finales
+# Columnas numéricas
+num_cols = ["comidas_uni", "edad", "cursos_dia"]
+
+# Variables finales
 X = df[cat_cols + num_cols]
 y = df["gasto_total"]
 
-# Pipeline completo
-preprocessor = ColumnTransformer([
-    ("num", StandardScaler(), num_cols),
-    ("cat", OneHotEncoder(drop="first", sparse_output=False), cat_cols)
-])
+# Pipeline
 pipeline = Pipeline([
-    ("prep", preprocessor),
+    ("scaler", StandardScaler()),
     ("reg", RidgeCV(alphas=[0.1, 1.0, 10.0]))
 ])
 
-# Entrenar y guardar
+# Entrenamiento
 pipeline.fit(X, y)
+
+# Guardar modelo entrenado
 joblib.dump(pipeline, "models/expenses_model.pkl")
-print("✔ Pipeline guardado correctamente.")
+joblib.dump(label_encoders, "models/label_encoders.pkl")
+
+print("✔ Modelo y codificadores guardados.")
