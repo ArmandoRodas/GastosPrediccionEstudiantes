@@ -24,7 +24,7 @@ df = df.rename(columns={
     'desayuno en casa': 'desayuno_casa',
     'compra desayuno': 'compra_desayuno',
     'comparte transporte': 'comparte_transporte',
-    'hecha o da dinero para gasolina': 'Hecha_o_da_dinero_para_gasolina',
+    'hecha o da dinero para gasolina': 'hecha_o_da_dinero_para_gasolina',
     'gasto_total_q': 'gasto_total'
 })
 
@@ -32,7 +32,7 @@ df = df.rename(columns={
 cat_cols = [
     "lugar_de_origen", "transporte_en_el_que_viaja", "compra_snacks", "actividades_extra",
     "lleva_almuerzo", "compra_almuerzo", "ocupacion", "desayuno_casa",
-    "compra_desayuno", "comparte_transporte", "Hecha_o_da_dinero_para_gasolina"
+    "compra_desayuno", "comparte_transporte", "hecha_o_da_dinero_para_gasolina"
 ]
 
 # Codificar categóricas con LabelEncoder
