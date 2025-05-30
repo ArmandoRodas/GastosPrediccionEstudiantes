@@ -47,7 +47,7 @@ if seccion == "Predicción de Gastos":
             comidas_uni = st.number_input("Comidas en la Uni", min_value=0, step=1)
             edad = st.number_input("Edad", min_value=12, step=1)
             cursos_dia = st.number_input("Cursos en el día", min_value=0, step=1)
-            gasolina_q = st.number_input("Dinero para gasolina (Q)", min_value=0.0, step=0.1)
+            gasolina_q = st.selectbox("¿Hecha o da dinero para gasolina?", ["Sí", "No"])
 
             selections = {}
             for col_name, options in zip(cat_cols, cats):
