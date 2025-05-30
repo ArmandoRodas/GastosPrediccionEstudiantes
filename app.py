@@ -60,7 +60,6 @@ if seccion == "Predicción de Gastos":
                     "comidas_uni": comidas_uni,
                     "edad": edad,
                     "cursos_dia": cursos_dia,
-                    "gasolina_q": gasolina_q
                 }
                 df_input = pd.DataFrame([data])
                 pred = pipeline.predict(df_input)[0]
