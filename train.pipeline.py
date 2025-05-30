@@ -59,7 +59,7 @@ pipeline = Pipeline([
 pipeline.fit(X, y)
 
 # Guardar modelo entrenado
-joblib.dump(pipeline, "models/expenses_model.pkl")
+joblib.dump(pipeline, "models/expenses_pipeline.pkl")
 joblib.dump(label_encoders, "models/label_encoders.pkl")
 
 print("✔ Modelo y codificadores guardados.")
