@@ -15,74 +15,59 @@ st.write("---")
 with st.sidebar.expander("🔧 Menú", expanded=True):
     seccion = st.radio("Elige la aplicación", ["Predicción de Gastos", "Proyecto Deep Learning"])
 
-# Cargar modelo
+# Función para cargar modelo y codificadores
 @st.cache_resource
-def load_pipeline():
-    return joblib.load("models/expenses_model.pkl")
+def load_assets():
+    model = joblib.load("models/expenses_model.pkl")
+    encoders = joblib.load("models/label_encoders.pkl")
+    return model, encoders
 
-@st.cache_resource
-def load_encoders():
-    return joblib.load("models/label_encoders.pkl")
-
-# SECCIÓN 1: Predicción de Gastos
+# Sección de predicción
 if seccion == "Predicción de Gastos":
     try:
-        pipeline = load_pipeline()
-        label_encoders = load_encoders()
+        pipeline, label_encoders = load_assets()
 
-        ct = pipeline.named_steps["prep"]
-        ohe = None
-        cat_cols = []
+        st.subheader("🧮 Parámetros de Entrada")
 
-        for name, transformer, cols in ct.transformers_:
-            if name == "cat":
-                ohe = transformer
-                cat_cols = cols
-                break
+        # Entradas numéricas
+        comidas = st.number_input("Comidas en la Universidad", min_value=0, step=1)
+        edad = st.number_input("Edad", min_value=18, step=1)
+        cursos = st.number_input("Cursos en el Día", min_value=0, step=1)
 
-        if ohe is None:
-            st.error("Error: No se encontró codificador categórico en el pipeline.")
-            st.stop()
+        # Entradas categóricas
+        data_input = {
+            "lugar_de_origen": st.selectbox("Lugar de Origen", ["Sansare", "Jalapa", "Guatemala", "Guastatoya", "Sanarate", "Agua Caliente", "San Antonio La Paz"]),
+            "transporte_en_el_que_viaja": st.selectbox("Transporte en el que Viaja", ["Bus", "Moto", "Carro", "A pie"]),
+            "compra_snacks": st.selectbox("Compra Snacks", ["Sí", "No"]),
+            "actividades_extra": st.selectbox("Actividades Extra en la Uni", ["Sí", "No"]),
+            "lleva_almuerzo": st.selectbox("Lleva Almuerzo", ["Sí", "No"]),
+            "compra_almuerzo": st.selectbox("Compra Almuerzo", ["Sí", "No"]),
+            "ocupacion": st.selectbox("Ocupación", ["Estudia", "Trabaja", "Ambas"]),
+            "desayuno_casa": st.selectbox("Desayuno en Casa", ["Sí", "No"]),
+            "compra_desayuno": st.selectbox("Compra Desayuno", ["Sí", "No"]),
+            "comparte_transporte": st.selectbox("Comparte Transporte", ["Sí", "No"]),
+            "hecha_o_da_dinero_para_gasolina": st.selectbox("¿Hecha o da dinero para gasolina?", ["Sí", "No"]),
+            "comidas_en_la_universidad": comidas,
+            "edad": edad,
+            "cursos_dia": cursos
+        }
 
-        cats = ohe.categories_
+        if st.button("▶️ Calcular gasto"):
+            df_input = pd.DataFrame([data_input])
 
-        col1, col2 = st.columns([1, 2], gap="large")
-        with col1:
-            st.subheader("🧮 Parámetros de Entrada")
+            # Aplicar codificadores
+            for col, encoder in label_encoders.items():
+                if col in df_input.columns:
+                    df_input[col] = encoder.transform(df_input[col])
 
-            # Entradas numéricas
-            comidas_universidad = st.number_input("Comidas en la Universidad", min_value=0, step=1)
-            edad = st.number_input("¿Tu Edad?", min_value=18, step=1)
-            cursos_dia = st.number_input("¿Por cuántos Cursos vas en el día de Universidad?", min_value=0, step=1)
+            # Predicción
+            pred = pipeline.predict(df_input)[0]
+            st.success(f"💰 Gasto estimado: Q{pred:.2f}")
 
-            # Entradas categóricas
-            selections = {}
-            for col_name, options in zip(cat_cols, cats):
-                label = col_name.replace("_", " ").capitalize()
-                selections[col_name] = st.selectbox(label, options)
-
-            if st.button("▶️ Calcular gasto"):
-                data = {
-                    **selections,
-                    "comidas_universidad": comidas_universidad,
-                    "edad": edad,
-                    "cursos_dia": cursos_dia
-                }
-
-                df_input = pd.DataFrame([data])
-
-                # Aplicar los LabelEncoders para convertir a numérico
-                for col, le in label_encoders.items():
-                    if col in df_input:
-                        df_input[col] = le.transform(df_input[col])
-
-                pred = pipeline.predict(df_input)[0]
-                st.success(f"💰 Gasto estimado: Q{pred:.2f}")
-
-        with col2:
-            st.subheader("📊 Resultados")
-            with st.expander("📄 Información del Proyecto"):
-                st.markdown("""
+        # Panel lateral
+        st.subheader("📊 Resultados")
+        with st.expander("📄 Información del Proyecto"):
+            st.markdown("""
                 Este proyecto predice cuánto gasta un estudiante universitario el día **domingo** cuando asiste a clases.
 
                 **Datos considerados:**
@@ -94,19 +79,15 @@ if seccion == "Predicción de Gastos":
                 - Comparte transporte 
                 - Hecha o da dinero para gasolina
 
-                **Modelo utilizado:** Regresión RidgeCV con codificación categórica y escalado numérico.
+                **Modelo utilizado:** Regresión RidgeCV con codificación categórica (`LabelEncoder`) y escalado numérico.
 
-                Esta predicción ayuda a anticipar gastos semanales y analizar patrones de consumo estudiantil.
-
-                **Streamlit** es la plataforma utilizada para subir a la nube la aplicación.
-                Con solo registrar su correo enlazado con **GitHub** (correo de la universidad)
-                le permite subir sus repositorios con sus proyectos a la nube y generar su propio enlace.
-                """, unsafe_allow_html=True)
+                **Plataforma:** Streamlit Cloud + GitHub (correo universitario).
+            """, unsafe_allow_html=True)
 
     except Exception as e:
         st.error(f"Ocurrió un error al cargar el pipeline: {e}")
 
-# SECCIÓN 2: Proyecto Deep Learning (Placeholder)
+# Sección placeholder
 else:
     st.header("🤖 Proyecto Deep Learning")
     st.info("Próximamente se integrará aquí el modelo basado en redes neuronales.")
