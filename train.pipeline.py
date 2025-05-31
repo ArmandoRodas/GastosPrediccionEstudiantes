@@ -1,9 +1,10 @@
 import pandas as pd
-from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.preprocessing import StandardScaler, OrdinalEncoder
 from sklearn.linear_model import RidgeCV
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 import joblib
+import os
 
 # Cargar los datos
 df = pd.read_excel("data/datos_gasto_ampliado.xlsx", engine="openpyxl")
@@ -13,7 +14,7 @@ df.columns = df.columns.str.strip().str.lower()
 df = df.rename(columns={
     'lugar de origen': 'lugar_de_origen',
     'transporte en el que viaja': 'transporte_en_el_que_viaja',
-    'comidas en la uni': 'comidas_universidad',
+    'comidas en la uni': 'comidas_en_la_universidad',
     'compra snacks': 'compra_snacks',
     'actividades extra en la uni': 'actividades_extra',
     'lleva almuerzo': 'lleva_almuerzo',
@@ -28,38 +29,37 @@ df = df.rename(columns={
     'gasto_total_q': 'gasto_total'
 })
 
-# Columnas categóricas
+# Columnas categóricas y numéricas
 cat_cols = [
     "lugar_de_origen", "transporte_en_el_que_viaja", "compra_snacks", "actividades_extra",
     "lleva_almuerzo", "compra_almuerzo", "ocupacion", "desayuno_casa",
     "compra_desayuno", "comparte_transporte", "hecha_o_da_dinero_para_gasolina"
 ]
 
-# Codificar categóricas con LabelEncoder
-label_encoders = {}
-for col in cat_cols:
-    le = LabelEncoder()
-    df[col] = le.fit_transform(df[col])
-    label_encoders[col] = le  # Guardar el encoder por si lo necesitas en producción
+num_cols = ["comidas_en_la_universidad", "edad", "cursos_dia"]
 
-# Columnas numéricas
-num_cols = ["comidas_universidad ", "edad", "cursos_dia"]
-
-# Variables finales
+# Separar variables
 X = df[cat_cols + num_cols]
 y = df["gasto_total"]
 
-# Pipeline
+# Preprocesamiento
+preprocessor = ColumnTransformer([
+    ("num", StandardScaler(), num_cols),
+    ("cat", OrdinalEncoder(handle_unknown="use_encoded_value", unknown_value=-1), cat_cols)
+])
+
+# Pipeline completo
 pipeline = Pipeline([
-    ("scaler", StandardScaler()),
+    ("prep", preprocessor),
     ("reg", RidgeCV(alphas=[0.1, 1.0, 10.0]))
 ])
 
-# Entrenamiento
+# Entrenar
 pipeline.fit(X, y)
 
-# Guardar modelo entrenado
-joblib.dump(pipeline, "models/expenses_model.pkl")
-joblib.dump(label_encoders, "models/label_encoders.pkl")
+# Crear carpeta si no existe
+os.makedirs("models", exist_ok=True)
 
-print("✔ Modelo y codificadores guardados.")
+# Guardar modelo
+joblib.dump(pipeline, "models/expenses_model.pkl")
+print("✔ Modelo entrenado y guardado correctamente.")
