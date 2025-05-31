@@ -24,6 +24,7 @@ def load_pipeline():
 if seccion == "Predicción de Gastos":
     try:
         pipeline = load_pipeline()
+        label_encoders=joblib.load("models/label_enorders.pkl")
 
         ct = pipeline.named_steps["prep"]
         ohe = None
