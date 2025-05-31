@@ -30,7 +30,7 @@ if seccion == "Predicción de Gastos":
         st.subheader("🧮 Parámetros de Entrada")
 
         # Entradas numéricas
-        comidas = st.number_input("Comidas en la Universidad", min_value=0, step=1)
+        comidas_universidad = st.number_input("Comidas en la Universidad", min_value=0, step=1)
         edad = st.number_input("Edad", min_value=18, step=1)
         cursos = st.number_input("Cursos en el Día", min_value=0, step=1)
 
@@ -47,7 +47,7 @@ if seccion == "Predicción de Gastos":
             "compra_desayuno": st.selectbox("Compra Desayuno", ["Si", "No"]),
             "comparte_transporte": st.selectbox("Comparte Transporte", ["Si", "No"]),
             "hecha_o_da_dinero_para_gasolina": st.selectbox("¿Hecha o da dinero para gasolina?", ["Si", "No"]),
-            "comidas_en_la_universidad": comidas,
+            "comidas_en_la_universidad": comidas_universidad,
             "edad": edad,
             "cursos_dia": cursos
         }
