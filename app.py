@@ -34,7 +34,7 @@ if seccion == "Predicción de Gastos":
         edad = st.number_input("Edad", min_value=18, step=1)
         cursos = st.number_input("Cursos en el Día", min_value=0, step=1)
 
-        # Entradas categóricas
+        # Entradas categóricas según los valores en tu dataset original
         data_input = {
             "lugar_de_origen": st.selectbox("Lugar de Origen", ["Sansare", "Jalapa", "Guatemala", "Guastatoya", "Sanarate", "Agua Caliente", "San Antonio La Paz"]),
             "transporte_en_el_que_viaja": st.selectbox("Transporte en el que Viaja", ["Bus", "Moto", "Carro", "A pie"]),
@@ -55,7 +55,11 @@ if seccion == "Predicción de Gastos":
         if st.button("▶️ Calcular gasto"):
             df_input = pd.DataFrame([data_input])
 
-            # Aplicar codificadores
+            # Limpiar texto por seguridad
+            for col in df_input.select_dtypes(include="object").columns:
+                df_input[col] = df_input[col].str.strip().str.capitalize()
+
+            # Codificar con LabelEncoder
             for col, encoder in label_encoders.items():
                 if col in df_input.columns:
                     df_input[col] = encoder.transform(df_input[col])
@@ -64,7 +68,7 @@ if seccion == "Predicción de Gastos":
             pred = pipeline.predict(df_input)[0]
             st.success(f"💰 Gasto estimado: Q{pred:.2f}")
 
-        # Panel lateral
+        # Información del proyecto
         st.subheader("📊 Resultados")
         with st.expander("📄 Información del Proyecto"):
             st.markdown("""
