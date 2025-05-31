@@ -15,16 +15,20 @@ st.write("---")
 with st.sidebar.expander("🔧 Menú", expanded=True):
     seccion = st.radio("Elige la aplicación", ["Predicción de Gastos", "Proyecto Deep Learning"])
 
-# Cargar pipeline
+# Cargar modelo
 @st.cache_resource
 def load_pipeline():
     return joblib.load("models/expenses_model.pkl")
+
+@st.cache_resource
+def load_encoders():
+    return joblib.load("models/label_encoders.pkl")
 
 # SECCIÓN 1: Predicción de Gastos
 if seccion == "Predicción de Gastos":
     try:
         pipeline = load_pipeline()
-        label_encoders=joblib.load("models/label_encoders.pkl")
+        label_encoders = load_encoders()
 
         ct = pipeline.named_steps["prep"]
         ohe = None
@@ -45,11 +49,13 @@ if seccion == "Predicción de Gastos":
         col1, col2 = st.columns([1, 2], gap="large")
         with col1:
             st.subheader("🧮 Parámetros de Entrada")
-            comidas_universidad  = st.number_input("Comidas en la Universidad", min_value=0, step=1)
-            edad = st.number_input("¿Tu Edad?", min_value=19, step=1)
-            cursos_dia = st.number_input("¿Por cuantos Cursos vas en el día de Universidad", min_value=0, step=1)
-            hecha_o_da_dinero_para_gasolina = st.selectbox("¿Hecha o da dinero para gasolina?", ["Si", "No"])
 
+            # Entradas numéricas
+            comidas_universidad = st.number_input("Comidas en la Universidad", min_value=0, step=1)
+            edad = st.number_input("¿Tu Edad?", min_value=18, step=1)
+            cursos_dia = st.number_input("¿Por cuántos Cursos vas en el día de Universidad?", min_value=0, step=1)
+
+            # Entradas categóricas
             selections = {}
             for col_name, options in zip(cat_cols, cats):
                 label = col_name.replace("_", " ").capitalize()
@@ -58,13 +64,14 @@ if seccion == "Predicción de Gastos":
             if st.button("▶️ Calcular gasto"):
                 data = {
                     **selections,
-                    "comidas_universidad ": comidas_universidad,
+                    "comidas_universidad": comidas_universidad,
                     "edad": edad,
-                    "cursos_dia": cursos_dia,
-                    "hecha_o_da_dinero_para_gasolina" : hecha_o_da_dinero_para_gasolina
+                    "cursos_dia": cursos_dia
                 }
+
                 df_input = pd.DataFrame([data])
 
+                # Aplicar los LabelEncoders para convertir a numérico
                 for col, le in label_encoders.items():
                     if col in df_input:
                         df_input[col] = le.transform(df_input[col])
@@ -90,10 +97,10 @@ if seccion == "Predicción de Gastos":
                 **Modelo utilizado:** Regresión RidgeCV con codificación categórica y escalado numérico.
 
                 Esta predicción ayuda a anticipar gastos semanales y analizar patrones de consumo estudiantil.
-                **Streamlit** es la plataforma utilizada para subir a la nube la aplicacion.
-                            Con solo registrar su correo enlazado con **Github** (correo de la universidad)
-                            le permite subir sus repositorios con sus proyectos a la nube.
-                            Dejandole hasta crear usted mismo el link
+
+                **Streamlit** es la plataforma utilizada para subir a la nube la aplicación.
+                Con solo registrar su correo enlazado con **GitHub** (correo de la universidad)
+                le permite subir sus repositorios con sus proyectos a la nube y generar su propio enlace.
                 """, unsafe_allow_html=True)
 
     except Exception as e:
