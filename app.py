@@ -57,7 +57,7 @@ if seccion == "Predicción de Gastos":
             if st.button("▶️ Calcular gasto"):
                 data = {
                     **selections,
-                    "comidas_uni": comidas_uni,
+                    "comidas_en_la_universidad": comidas_uni,
                     "edad": edad,
                     "cursos_dia": cursos_dia,
                     "hecha_o_da_dinero_para_gasolina" : hecha_o_da_dinero_para_gasolina
