@@ -1,9 +1,8 @@
 import streamlit as st
 import pandas as pd
 import joblib
-import unicodedata
 
-# Configuración de página
+# Configuracion de pagina
 st.set_page_config(page_title="IA Sanarate", layout="wide")
 
 # Cabecera
@@ -12,26 +11,18 @@ st.markdown("<h1 style='text-align:center;'>Inteligencia artificial</h1>", unsaf
 st.markdown("<h3 style='text-align:center;'>9no. Ingenieria en Sistemas Sanarate</h3>", unsafe_allow_html=True)
 st.write("---")
 
-# Menú lateral
+# Menu lateral
 with st.sidebar.expander("🔧 Menu", expanded=True):
     seccion = st.radio("Elige la aplicacion", ["Prediccion de Gastos", "Proyecto Deep Learning"])
 
-# Función para cargar modelo y codificadores
+# Funcion para cargar modelo y codificadores
 @st.cache_resource
 def load_assets():
     model = joblib.load("models/expenses_model.pkl")
     encoders = joblib.load("models/label_encoders.pkl")
     return model, encoders
 
-# Funcion para limpiar texto (quitar tildes y estandarizar)
-def limpiar_texto(texto):
-    if isinstance(texto, str):
-        texto = texto.strip()
-        texto = unicodedata.normalize("NFKD", texto).encode("ASCII", "ignore").decode("utf-8")
-        return texto.capitalize()
-    return texto
-
-# Sección de predicción
+# Seccion de prediccion
 if seccion == "Prediccion de Gastos":
     try:
         pipeline, label_encoders = load_assets()
@@ -43,19 +34,19 @@ if seccion == "Prediccion de Gastos":
         edad = st.number_input("Edad", min_value=18, step=1)
         cursos = st.number_input("Cursos en el Dia", min_value=0, step=1)
 
-        # Entradas categoricas
+        # Entradas categoricas (respetando exactamente los valores con tildes)
         data_input = {
             "lugar_de_origen": st.selectbox("Lugar de Origen", ["Sansare", "Jalapa", "Guatemala", "Guastatoya", "Sanarate", "Agua Caliente", "San Antonio La Paz"]),
             "transporte_en_el_que_viaja": st.selectbox("Transporte en el que Viaja", ["Bus", "Moto", "Carro", "A pie"]),
-            "compra_snacks": st.selectbox("Compra Snacks", ["Si", "No"]),
-            "actividades_extra": st.selectbox("Actividades Extra en la Uni", ["Si", "No"]),
-            "lleva_almuerzo": st.selectbox("Lleva Almuerzo", ["Si", "No"]),
-            "compra_almuerzo": st.selectbox("Compra Almuerzo", ["Si", "No"]),
+            "compra_snacks": st.selectbox("Compra Snacks", ["Sí", "No"]),
+            "actividades_extra": st.selectbox("Actividades Extra en la Uni", ["Sí", "No"]),
+            "lleva_almuerzo": st.selectbox("Lleva Almuerzo", ["Sí", "No"]),
+            "compra_almuerzo": st.selectbox("Compra Almuerzo", ["Sí", "No"]),
             "ocupacion": st.selectbox("Ocupacion", ["Estudia", "Trabaja", "Ambas"]),
-            "desayuno_casa": st.selectbox("Desayuno en Casa", ["Si", "No"]),
-            "compra_desayuno": st.selectbox("Compra Desayuno", ["Si", "No"]),
-            "comparte_transporte": st.selectbox("Comparte Transporte", ["Si", "No"]),
-            "hecha_o_da_dinero_para_gasolina": st.selectbox("Hecha o da dinero para gasolina", ["Si", "No"]),
+            "desayuno_casa": st.selectbox("Desayuno en Casa", ["Sí", "No"]),
+            "compra_desayuno": st.selectbox("Compra Desayuno", ["Sí", "No"]),
+            "comparte_transporte": st.selectbox("Comparte Transporte", ["Sí", "No"]),
+            "hecha_o_da_dinero_para_gasolina": st.selectbox("Hecha o da dinero para gasolina", ["Sí", "No"]),
             "comidas_en_la_universidad": comidas_universidad,
             "edad": edad,
             "cursos_dia": cursos
@@ -63,10 +54,6 @@ if seccion == "Prediccion de Gastos":
 
         if st.button("▶️ Calcular gasto"):
             df_input = pd.DataFrame([data_input])
-
-            # Limpiar texto (quitar tildes y capitalizar)
-            for col in df_input.select_dtypes(include="object").columns:
-                df_input[col] = df_input[col].apply(limpiar_texto)
 
             # Codificar con LabelEncoder
             for col, encoder in label_encoders.items():
