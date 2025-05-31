@@ -13,7 +13,7 @@ df.columns = df.columns.str.strip().str.lower()
 df = df.rename(columns={
     'lugar de origen': 'lugar_de_origen',
     'transporte en el que viaja': 'transporte_en_el_que_viaja',
-    'comidas en la uni': 'comidas_en_la_Universidad',
+    'comidas en la uni': 'comidas_en_la_universidad',
     'compra snacks': 'compra_snacks',
     'actividades extra en la uni': 'actividades_extra',
     'lleva almuerzo': 'lleva_almuerzo',
@@ -43,7 +43,7 @@ for col in cat_cols:
     label_encoders[col] = le  # Guardar el encoder por si lo necesitas en producción
 
 # Columnas numéricas
-num_cols = ["comidas_en_la_Universidad", "edad", "cursos_dia"]
+num_cols = ["comidas_en_la_universidad", "edad", "cursos_dia"]
 
 # Variables finales
 X = df[cat_cols + num_cols]
