@@ -63,6 +63,11 @@ if seccion == "Predicción de Gastos":
                     "hecha_o_da_dinero_para_gasolina" : hecha_o_da_dinero_para_gasolina
                 }
                 df_input = pd.DataFrame([data])
+
+                for col, le in label_encoders.items():
+                    if col in df_input:
+                        df_input[col] = le.transform(df_input[col])
+
                 pred = pipeline.predict(df_input)[0]
                 st.success(f"💰 Gasto estimado: Q{pred:.2f}")
 
